@@ -1,4 +1,4 @@
-module github.com/mhausenblas/rback
+module github.com/team-soteria/rback
 
 go 1.12
 

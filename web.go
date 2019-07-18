@@ -11,7 +11,7 @@ import (
 
 	"github.com/emicklei/dot"
 
-	"github.com/mhausenblas/rback/internal/svgpanzoom"
+	"github.com/team-soteria/rback/internal/svgpanzoom"
 )
 
 const webViewTemplate = `<html>

@@ -50,7 +50,7 @@ func (r *Rback) genGraph() *dot.Graph {
 			}
 			gns := newNamespaceSubgraph(g, ns)
 
-			for sa, _ := range sas {
+			for sa := range sas {
 				renderSA := r.config.resourceKind == "" || (r.namespaceSelected(ns) && r.resourceNameSelected(sa))
 				if renderSA {
 					r.newSubjectNode(gns, "ServiceAccount", ns, sa)
@@ -75,7 +75,7 @@ func (r *Rback) genGraph() *dot.Graph {
 		}
 
 		gns := newNamespaceSubgraph(g, ns)
-		for roleName, _ := range roles {
+		for roleName := range roles {
 			renderRole := r.namespaceSelected(ns) && r.resourceNameSelected(roleName)
 			if renderRole {
 				r.newRoleAndRulesNodePair(gns, "", NamespacedName{ns, roleName})

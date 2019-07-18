@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/pkg/browser"
 )
 
 type Rback struct {
@@ -21,6 +23,8 @@ type Config struct {
 	resourceKind    string
 	resourceNames   []string
 	whoCan          WhoCan
+	png             string
+	web             bool
 }
 
 type WhoCan struct {
@@ -48,7 +52,30 @@ func main() {
 		os.Exit(-1)
 	}
 	g := rback.genGraph()
-	fmt.Println(g.String())
+
+	switch true {
+	// If "png" flag is present, export the image as png.
+	case config.png != "":
+		err = writePng(g, config.png)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing image: %v\n", err)
+			os.Exit(-1)
+		}
+	// If "web" flag is present, export the graph as svg and display it in a browser.
+	case config.web:
+		html, err := generateWebView(g)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error generating svg: %v\n", err)
+			os.Exit(-1)
+		}
+		if err = browser.OpenReader(html); err != nil {
+			fmt.Fprintf(os.Stderr, "Error displaying graph in browser: %v\n", err)
+			os.Exit(-1)
+		}
+	// If no flags are present, print the graph to stdout.
+	default:
+		fmt.Println(g.String())
+	}
 }
 
 func parseConfigFromArgs() Config {
@@ -57,6 +84,8 @@ func parseConfigFromArgs() Config {
 	flag.BoolVar(&config.showLegend, "show-legend", true, "Whether to show the legend or not")
 	flag.BoolVar(&config.showRules, "show-rules", true, "Whether to render RBAC access rules (e.g. \"get pods\") or not")
 	flag.BoolVar(&config.whoCan.showMatchedOnly, "show-matched-rules-only", false, "When running who-can, only show the matched rule instead of all rules specified in the role")
+	flag.StringVar(&config.png, "png", "", "Export the graph as PNG image.")
+	flag.BoolVar(&config.web, "web", false, "Show the graph in a browser.")
 
 	var namespaces string
 	flag.StringVar(&namespaces, "n", "", "The namespace to render (also supports multiple, comma-delimited namespaces)")

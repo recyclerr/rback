@@ -60,12 +60,28 @@ There are plenty of Graphviz (`dot`) online visualization tools available, for e
 
 ### Render locally
 
-Install [Graphviz](https://www.graphviz.org/), for example, on macOS you can do `brew install graphviz`. Then you can do the following (on macOS):
+Install [Graphviz](https://www.graphviz.org/), for example, on macOS you can do `brew install graphviz`. Then you can do the following:
+
+macOS:
 
 ```sh
-$ kubectl get sa,roles,rolebindings,clusterroles,clusterrolebindings --all-namespaces -o json | rback | dot -Tpng  > /tmp/rback.png && open /tmp/rback.png
+$ kubectl get sa,roles,rolebindings,clusterroles,clusterrolebindings --all-namespaces -o json | rback -png /tmp/rback.png && open /tmp/rback.png
 ```
 
+Linux:
+
+```sh
+$ kubectl get sa,roles,rolebindings,clusterroles,clusterrolebindings --all-namespaces -o json | rback -png /tmp/rback.png && xdg-open /tmp/rback.png
+```
+
+### Web view
+
+Graph can also be displayed in a browser.  
+Requires [Graphviz](https://www.graphviz.org/). Just run:
+
+```sh
+$ kubectl get sa,roles,rolebindings,clusterroles,clusterrolebindings --all-namespaces -o json | rback -web
+```
 
 ## Using rback as a kubectl plugin
 

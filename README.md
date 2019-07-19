@@ -62,22 +62,13 @@ There are plenty of Graphviz (`dot`) online visualization tools available, for e
 
 Install [Graphviz](https://www.graphviz.org/), for example, on macOS you can do `brew install graphviz`. Then you can do the following:
 
-macOS:
-
 ```sh
-$ kubectl get sa,roles,rolebindings,clusterroles,clusterrolebindings --all-namespaces -o json | rback -png /tmp/rback.png && open /tmp/rback.png
-```
-
-Linux:
-
-```sh
-$ kubectl get sa,roles,rolebindings,clusterroles,clusterrolebindings --all-namespaces -o json | rback -png /tmp/rback.png && xdg-open /tmp/rback.png
+$ kubectl get sa,roles,rolebindings,clusterroles,clusterrolebindings --all-namespaces -o json | rback | dot -Tpng  > /tmp/rback.png && open /tmp/rback.png
 ```
 
 ### Web view
 
-Graph can also be displayed in a browser.  
-Requires [Graphviz](https://www.graphviz.org/). Just run:
+Graph can also be rendered using [viz.js](https://github.com/mdaines/viz.js/) and displayed in a browser. Just run:
 
 ```sh
 $ kubectl get sa,roles,rolebindings,clusterroles,clusterrolebindings --all-namespaces -o json | rback -web
@@ -89,7 +80,7 @@ There is also a very crude first version of a kubectl plugin in https://github.c
 ```sh
 $ kubectl rback
 ```
-This will generate the `.dot` file, render it using GraphViz (must be installed on your system) and open the rendered image using `xgd-open`. 
+This render the graph using viz.js and display it in a browser.
 
 We welcome contributions to make the plugin work in other environments.
 

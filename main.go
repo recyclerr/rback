@@ -53,22 +53,17 @@ func main() {
 	}
 	g := rback.genGraph()
 
-	switch true {
-	// If "png" flag is present, export the image as png.
-	case config.png != "":
-		err = writePng(g, config.png)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error writing image: %v\n", err)
-			os.Exit(-1)
-		}
-	// If "web" flag is present, export the graph as svg and display it in a browser.
+	switch {
+	// If "web" flag is present, display the graph in a browser.
 	case config.web:
 		html, err := generateWebView(g)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error generating svg: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error generating web view: %v\n", err)
 			os.Exit(-1)
 		}
-		if err = browser.OpenReader(html); err != nil {
+
+		err = browser.OpenReader(html)
+		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error displaying graph in browser: %v\n", err)
 			os.Exit(-1)
 		}

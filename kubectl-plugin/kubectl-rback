@@ -1,5 +1,3 @@
 #!/bin/bash
 
-kubectl get sa,roles,rolebindings,clusterroles,clusterrolebindings --all-namespaces -o json | \
-	rback -png /tmp/rback.png && \
-	xdg-open /tmp/rback.png
+kubectl get sa,roles,rolebindings,clusterroles,clusterrolebindings --all-namespaces -o json | rback -web

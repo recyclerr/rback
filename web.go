@@ -2,16 +2,12 @@ package main
 
 import (
 	"bytes"
-	"fmt"
-	"os"
-	"os/exec"
-	"regexp"
-	"strings"
 	"text/template"
 
 	"github.com/emicklei/dot"
 
-	"github.com/team-soteria/rback/internal/svgpanzoom"
+	"github.com/team-soteria/rback/third-party/svgpanzoom"
+	"github.com/team-soteria/rback/third-party/vizjs"
 )
 
 const webViewTemplate = `<html>
@@ -19,54 +15,46 @@ const webViewTemplate = `<html>
 <title>rback</title>
 </head>
 <body>
-{{ .Svg }}
+<script>{{template "svgPanZoom" .}}</script>
+<script>{{template "vizJs" .}}</script>
+<script>{{template "vizJsRender" .}}</script>
 <script>
-{{ .SvgPanZoomSrc }}
-</script>
-<script>
-svgPanZoom('#svg', {
-	zoomEnabled: true,
-	controlIconsEnabled: true,
-	fit: true,
-	center: true,
-	minZoom: 0.1
-});
+    const graph = ` + "`" + `{{ .Graph }}` + "`" + `;
+    let viz = new Viz();
+    viz.renderSVGElement(graph).then(function (element) {
+        element.setAttribute("id", "svg");
+        element.setAttribute("width", "100%");
+        element.setAttribute("height", "100%");
+        document.body.appendChild(element);
+        svgPanZoom('#svg', {
+            zoomEnabled: true,
+            controlIconsEnabled: true,
+            fit: true,
+            center: true,
+            minZoom: 0.8
+        });
+    }).catch(error => {
+        viz = new Viz();
+        console.error(error);
+    });
 </script>
 </body>
 </html>
 `
 
 type webViewData struct {
-	Svg           string
-	SvgPanZoomSrc string
+	Graph string
 }
 
 func generateWebView(graph *dot.Graph) (*bytes.Buffer, error) {
-	svgBuffer := new(bytes.Buffer)
-	cmd := exec.Command("dot", "-Tsvg")
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = strings.NewReader(graph.String()), svgBuffer, os.Stderr
-	if err := cmd.Run(); err != nil {
-		return nil, fmt.Errorf("failed to execute dot. Is Graphviz installed? Error: %v", err)
-	}
+	tpl, _ := template.New("vizJsTemplate").Parse(webViewTemplate)
 
-	svg := svgBuffer.String()
+	template.Must(tpl.Parse(`{{define "svgPanZoom"}}` + svgpanzoom.JsSource + `{{end}}`))
+	template.Must(tpl.Parse(`{{define "vizJs"}}` + vizjs.JsSource + `{{end}}`))
+	template.Must(tpl.Parse(`{{define "vizJsRender"}}` + "{{`" + vizjs.JsRenderSource + "`}}{{end}}"))
 
-	// Work around for dot bug which misses quoting some ampersands,
-	// resulting on unparsable SVG.
-	svg = strings.Replace(svg, "&;", "&amp;;", -1)
+	buf := new(bytes.Buffer)
+	err := tpl.Execute(buf, webViewData{Graph: graph.String()})
 
-	// Drop the stuff before the <svg> start, and set the size to 100%.
-	viewBox := regexp.MustCompile(`<svg\s*width="[^"]+"\s*height="[^"]+"\s*viewBox="[^"]+"`)
-	if loc := viewBox.FindStringIndex(svg); loc != nil {
-		svg = `<svg id="svg" width="100%" height="100%"` + svg[loc[1]:]
-	}
-
-	htmlBuffer := new(bytes.Buffer)
-	tpl, _ := template.New("webViewTemplate").Parse(webViewTemplate)
-	err := tpl.Execute(htmlBuffer, webViewData{
-		Svg:           svg,
-		SvgPanZoomSrc: svgpanzoom.JSSource,
-	})
-
-	return htmlBuffer, err
+	return buf, err
 }

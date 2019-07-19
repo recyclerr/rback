@@ -23,7 +23,6 @@ type Config struct {
 	resourceKind    string
 	resourceNames   []string
 	whoCan          WhoCan
-	png             string
 	web             bool
 }
 
@@ -79,7 +78,6 @@ func parseConfigFromArgs() Config {
 	flag.BoolVar(&config.showLegend, "show-legend", true, "Whether to show the legend or not")
 	flag.BoolVar(&config.showRules, "show-rules", true, "Whether to render RBAC access rules (e.g. \"get pods\") or not")
 	flag.BoolVar(&config.whoCan.showMatchedOnly, "show-matched-rules-only", false, "When running who-can, only show the matched rule instead of all rules specified in the role")
-	flag.StringVar(&config.png, "png", "", "Export the graph as PNG image.")
 	flag.BoolVar(&config.web, "web", false, "Show the graph in a browser.")
 
 	var namespaces string
